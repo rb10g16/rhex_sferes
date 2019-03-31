@@ -94,8 +94,8 @@ sudo apt-get install libtbb-dev
 - Create an experiment folder (if there's none) and cd to it: `mkdir exp && cd exp`
 - Clone map_elites_rhex_v2: `git clone https://github.com/rb10g16/rhex_sferes.git`
 - Go back to your `sferes2` root directory
-- Configure the experiment: `./waf configure --exp map_elites_rhex_v2`
-- Compile the experiment: `./waf --exp map_elites_rhex_v2`
+- Configure the experiment: `./waf configure --exp rhex_sferes`
+- Compile the experiment: `./waf --exp rhex_sferes`
 
 ## How to run
 
