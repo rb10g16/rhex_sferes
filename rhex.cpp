@@ -145,7 +145,8 @@ int main(int argc, char **argv) {
   // we can now process the comannd line options an run the
   // evolutionary algorithm (if a --load argument is passed, the file
   // is loaded; otherwise, the algorithm is launched).
-  init_simu(std::string("RHex8.skel"));
+  //init_simu(std::string("RHex8.skel"));
+  init_simu(std::string(std::getenv("RESIBOTS_DIR")) + "/share/hexapod_models/URDF/RHex8.skel");  
 
 
   run_ea(argc, argv, ea, fit_t());//fit_t() is optionnal
