@@ -37,15 +37,15 @@ struct Params {
   };
   struct pop {
     // size of the population
-    SFERES_CONST unsigned size = 4;
+    SFERES_CONST unsigned size = 20;
     // number of generations
-    SFERES_CONST unsigned nb_gen = 5;
+    SFERES_CONST unsigned nb_gen = 10000;
     // how often should the result file be written (here, each 5
     // generation)
-    SFERES_CONST int dump_period = 1;
+    SFERES_CONST int dump_period = 100;
     // how many individuals should be created during the random
     // generation process?
-    SFERES_CONST int initial_aleat = 1;
+    SFERES_CONST int initial_aleat = 3;
     // used by RankSimple to select the pressure
     SFERES_CONST float coeff = 1.1f;
     // the number of individuals that are kept from on generation to
@@ -54,9 +54,9 @@ struct Params {
   };
   struct parameters {
     // maximum value of parameters
-    SFERES_CONST float min = -10.0f;
+    SFERES_CONST float min = 0.0f;
     // minimum value
-    SFERES_CONST float max = 10.0f;
+    SFERES_CONST float max = 1.0f;
   };
 };
 
@@ -69,6 +69,7 @@ void init_simu(std::string robot_file)
     std::vector<rhex_dart::RhexDamage> brk = {};
     auto global_robot = std::make_shared<rhex_dart::Rhex>(robot_file,"Rhex",false,brk);
 
+
 }
 
 SFERES_FITNESS(FitTest, sferes::fit::Fitness) {
@@ -79,23 +80,33 @@ public:
   template<typename Indiv>
   void eval(const Indiv& ind) {
     _ctrl.clear();
-    for (size_t i = 0; i < 48; i++)
+    //double sum=0;
+    double interim;
+    for (size_t i = 0; i < 48; i++){
       if(i<8){
-        _ctrl.push_back(ind.data(i));
+      	interim = ind.data(i);
+      	//sum += interim;
+      	if(i>4){
+      		_ctrl.push_back(interim*10);
+      	}else{
+        	_ctrl.push_back(interim);
+        }
       }else{
         _ctrl.push_back(0);
       }
+    }
+    std::vector<rhex_dart::RhexDamage> brk = {};
+    auto robot = std::make_shared<rhex_dart::Rhex>(std::string(std::getenv("RESIBOTS_DIR")) + "/share/hexapod_models/URDF/RHex8.skel","Rhex",false,brk);
 
-    auto robot = global::global_robot->clone();
+    //auto robot = global::global_robot->clone();
     using desc_t = boost::fusion::vector<rhex_dart::descriptors::DutyCycle, rhex_dart::descriptors::BodyOrientation>;
-
     using viz_t = boost::fusion::vector<rhex_dart::visualizations::HeadingArrow, rhex_dart::visualizations::PointingArrow<Params>>;
 
     rhex_dart::RhexDARTSimu<rhex_dart::desc<desc_t>, rhex_dart::viz<viz_t>> simu(_ctrl, robot);
 
     simu.run(10);
 
-    this->_value = simu.covered_distance()*simu.body_avg_height(); 
+    this->_value = simu.covered_distance();//*simu.body_avg_height(); 
   }
 
 
@@ -111,7 +122,7 @@ int main(int argc, char **argv) {
   // We define the genotype. Here we choose EvoFloat (real
   // numbers). We evolve 8 real numbers, with the params defined in
   // Params (cf the beginning of this file)
-  typedef gen::EvoFloat<8, Params> gen_t;
+  typedef gen::EvoFloat<9, Params> gen_t;
   // This genotype should be simply transformed into a vector of
   // parameters (phen::Parameters). The genotype could also have been
   // transformed into a shape, a neural network... The phenotype need
@@ -146,7 +157,8 @@ int main(int argc, char **argv) {
   // evolutionary algorithm (if a --load argument is passed, the file
   // is loaded; otherwise, the algorithm is launched).
   //init_simu(std::string("RHex8.skel"));
-  init_simu(std::string(std::getenv("RESIBOTS_DIR")) + "/share/hexapod_models/URDF/RHex8.skel");  
+
+ // init_simu(std::string(std::getenv("RESIBOTS_DIR")) + "/share/hexapod_models/URDF/RHex8.skel");  
 
 
   run_ea(argc, argv, ea, fit_t());//fit_t() is optionnal
